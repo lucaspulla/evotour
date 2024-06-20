@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evo Tour</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        /* Basic styling for the app */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .button {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button.disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+        .select-tour {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        h2 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+        img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .input-field {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .hearts {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .heart {
+            color: red;
+            font-size: 24px;
+            margin-left: 5px;
+        }
+        .feedback {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        #map {
+            height: 300px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="step-1">
+            <h2>Welcome to Evo Tour</h2>
+            <button class="button" onclick="nextStep('step-2')">Start Tour</button>
+        </div>
+        <div id="step-2" class="hidden">
+            <h2>App Engagement</h2>
+            <p>Welcome to Evo Tour! Please choose a tour to start.</p>
+            <button class="button" onclick="nextStep('step-3')">Choose Tour</button>
+        </div>
+        <div id="step-3" class="hidden">
+            <h2>Select a Tour</h2>
+            <select class="select-tour" id="tour-select">
+                <option value="pedra-branca">Pedra Branca Experience</option>
+            </select>
+            <button class="button" onclick="startTour()">Start Tour</button>
+        </div>
+        <div id="step-4" class="hidden">
+            <h2>Pedra Branca Experience</h2>
+            <div id="map"></div>
+            <p>Go to this place to start the tour.</p>
+            <p>When you reach the place, press the button.</p>
+            <button id="start-tour-button" class="button disabled" onclick="startMystery()">I've Arrived</button>
+            <div id="location-message" class="feedback"></div>
+        </div>
+        <div id="step-5" class="hidden">
+            <div class="hearts" id="hearts">
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+            </div>
+            <h2>Introduction to the Mystery</h2>
+            <p>Welcome to the Pedra Branca experience in Palhoça, Santa Catarina! As you explore this vibrant coworking space, you will uncover hidden secrets and solve intriguing mysteries. Are you ready to dive into a world of innovation, creativity, and adventure?</p>
+            <p>Let's begin your journey and discover the magic of Palhoça.</p>
+            <button class="button" onclick="nextStep('step-6')">Next</button>
+        </div>
+        <div id="step-6" class="hidden">
+            <div class="hearts" id="hearts-1"></div>
+            <h2>The Vanished Blueprint</h2>
+            <p>"I hold the future in lines and schemes, but now I’m lost in a place of dreams. Find me where ideas are brewed, and solutions are often chewed."</p>
+            <p><strong>Clue:</strong> Look near the coffee station where people gather for breaks.</p>
+            <input type="text" class="input-field" id="answer-1" placeholder="Your answer here">
+            <button class="button" onclick="checkAnswer(1, 'Innovations')">Submit</button>
+            <div id="feedback-1" class="feedback"></div>
+        </div>
+        <div id="step-7" class="hidden">
+            <div class="hearts" id="hearts-2"></div>
+            <h2>The Hidden Password</h2>
+            <p>"I am the key to unlock the mind, concealed in words you must find. Search for the wall where colors blend, and there my secret message send."</p>
+            <p><strong>Clue:</strong> Head to the mural that depicts collaboration and creativity.</p>
+            <input type="text" class="input-field" id="answer-2" placeholder="Your answer here">
+            <button class="button" onclick="checkAnswer(2, 'Collab')">Submit</button>
+            <div id="feedback-2" class="feedback"></div>
+        </div>
+        <div id="step-8" class="hidden">
+            <div class="hearts" id="hearts-3"></div>
+            <h2>The Disappearing USB</h2>
+            <p>"Small and mighty, I store great thought, but now I’m hidden and must be sought. Seek where the green and growing reside, and there you’ll find where I hide."</p>
+            <p><strong>Clue:</strong> Go to the indoor garden area with the potted plants.</p>
+            <input type="text" class="input-field" id="answer-3" placeholder="Your answer here">
+            <button class="button" onclick="checkAnswer(3, 'Growth')">Submit</button>
+            <div id="feedback-3" class="feedback"></div>
+        </div>
+        <div id="step-9" class="hidden">
+            <div class="hearts" id="hearts-4"></div>
+            <h2>Completing Phase Two</h2>
+            <p>Repeat process for second phase.</p>
+            <button class="button" onclick="nextStep('step-10')">Next</button>
+        </div>
+        <div id="step-10" class="hidden">
+            <div class="hearts" id="hearts-5"></div>
+            <h2>Rewards Collection</h2>
+            <p>Collect points or badges.</p>
+            <button class="button" onclick="nextStep('step-11')">Collect</button>
+        </div>
+        <div id="step-11" class="hidden">
+            <div class="hearts" id="hearts-6"></div>
+            <h2>Tour Completion</h2>
+            <p>Finish tour, receive completion message.</p>
+            <p>Congratulations! You've completed the tour.</p>
+        </div>
+        <div id="step-gameover" class="hidden">
+            <h2>Game Over</h2>
+            <p>You've lost all your lives. Please restart the tour to try again.</p>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
