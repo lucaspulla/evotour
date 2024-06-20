@@ -1,6 +1,6 @@
 let lives = 3;
 const tourLocation = { latitude: -27.6220, longitude: -48.6770 }; // Coordinates for Pedra Branca Experience
-const locationRange = 500; // Define the acceptable range (in meters) for matching location
+const locationRange = 400; // Define the acceptable range (in meters) for matching location
 let map, userMarker, tourCircle;
 
 function nextStep(step) {
